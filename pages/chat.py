@@ -8,27 +8,32 @@ st.set_page_config(
     layout="wide"
 )
 
-# 고급스러운 딥 다크 미스터리 스타일링
+# 전체 가독성을 위한 하얀색 글자 커스텀 CSS
 st.markdown("""
 <style>
-    /* 전체 배경 및 기본 글자색 설정 */
+    /* 전체 앱 배경 및 기본 글자색 흰색 강제 적용 */
     .stApp {
         background-color: #0E1117;
-        color: #FFFFFF;
+        color: #FFFFFF !important;
     }
     
+    /* 모든 일반 p, span, label, div 태그 글자색 흰색 통일 */
+    p, span, label, div {
+        color: #FFFFFF !important;
+    }
+
     /* 메인 타이틀 */
     .main-title {
         font-size: 2.3rem;
         font-weight: 800;
-        color: #FF4B4B;
+        color: #FF4B4B !important;
         text-align: center;
         margin-bottom: 5px;
         text-shadow: 0px 0px 10px rgba(255, 75, 75, 0.3);
     }
     .sub-title {
         font-size: 1rem;
-        color: #B0B3B8;
+        color: #D1D5DB !important;
         text-align: center;
         margin-bottom: 30px;
     }
@@ -45,7 +50,7 @@ st.markdown("""
     
     /* 정보 카드 내부 헤더 */
     .victim-header {
-        color: #FFD700;
+        color: #FFD700 !important;
         font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 15px;
@@ -53,7 +58,7 @@ st.markdown("""
         padding-bottom: 8px;
     }
     
-    /* 카드 내부 모든 본문 텍스트 - 완전한 하얀색 적용 */
+    /* 카드 내부 리스트 */
     .info-card ul {
         margin: 0;
         padding-left: 20px;
@@ -64,20 +69,33 @@ st.markdown("""
         line-height: 1.7;
         margin-bottom: 8px;
     }
-    .info-card li b {
-        color: #FFFFFF !important;
-    }
     
     /* 단서 배지 */
     .clue-badge {
         background-color: #2D3748;
-        color: #FFD700;
+        color: #FFD700 !important;
         padding: 3px 8px;
         border-radius: 4px;
         font-size: 0.85rem;
         font-weight: bold;
         margin-right: 6px;
         border: 1px solid #4A5568;
+    }
+
+    /* Streamlit 섹션 제목 (h1, h2, h3 등) 색상 통일 */
+    h1, h2, h3, h4, h5, h6 {
+        color: #FFFFFF !important;
+    }
+
+    /* selectbox, radio 버튼 라벨 및 항목 흰색 글씨 */
+    .stSelectbox label, .stRadio label, .stCaption {
+        color: #FFFFFF !important;
+        font-size: 1rem !important;
+    }
+    
+    /* Radio 선택지 텍스트 가독성 강화 */
+    div[data-testid="stMarkdownContainer"] > p {
+        color: #FFFFFF !important;
     }
 </style>
 """, unsafe_allow_html=True)
