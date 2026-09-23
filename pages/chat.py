@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 다크 배경 + 드롭다운 선택창 및 펼쳐지는 목록 내부 글씨는 완전 검은색 적용
+# 다크 배경 + 입력창/드롭다운 내부 글씨 검은색 가독성 완벽 보장
 st.markdown("""
 <style>
     /* 전체 앱 배경 */
@@ -17,7 +17,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     
-    /* 일반 텍스트, 라벨, 헤더를 하얀색으로 통일 */
+    /* 일반 텍스트, 라벨, 헤더 흰색 */
     p, span, label, div {
         color: #FFFFFF !important;
     }
@@ -25,12 +25,10 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* selectbox 클릭 전 입력 상자 내부 글씨 - 검은색 */
+    /* selectbox 드롭다운 텍스트 검은색 */
     div[data-baseweb="select"] * {
         color: #000000 !important;
     }
-
-    /* selectbox 클릭 후 아래로 펼쳐지는 드롭다운 팝업 목록 내부 전체 - 검은색 */
     ul[role="listbox"] * {
         color: #000000 !important;
     }
@@ -38,9 +36,16 @@ st.markdown("""
         color: #000000 !important;
     }
 
-    /* 채팅 입력창 내부 텍스트 - 검은색 */
-    div[data-baseweb="input"] input {
+    /* 하단 채팅 입력창(st.chat_input) 텍스트 검은색 및 배경색 명확화 */
+    div[data-testid="stChatInput"] input {
         color: #000000 !important;
+        background-color: #FFFFFF !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
+    div[data-testid="stChatInput"] textarea {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
     /* 메인 타이틀 */
@@ -152,7 +157,7 @@ with col2:
 
 st.divider()
 
-# 4. 용의자 정보 및 AI 페르소나 설정 (이주은으로 수정 완료)
+# 4. 용의자 정보 및 AI 페르소나 설정
 suspect_profiles = {
     "설하은 (동급생, 전교 2등)": {
         "desc": "김채원에게 매번 전교 1등을 빼앗기며 극심한 스트레스를 받아옴. 김채원에게 모진 소리를 자주 들었음.",
