@@ -2,8 +2,8 @@ import streamlit as st
 from openai import OpenAI
 
 # 페이지 제목 설정
-st.title("❄️ 차가운 남자친구")
-st.caption("필요한 말만 합니다. 잡담은 사절이에요.")
+st.title("🐶 댕댕이 남자친구")
+st.caption("너만 기다리고 있었어! 오늘 하루는 어땠어?")
 
 # 1. secrets에서 API 키 불러오기
 try:
@@ -19,26 +19,26 @@ client = OpenAI(
 )
 
 # 3. 페르소나(성격) 및 대화 기록 세션 초기화
-if "bf_messages" not in st.session_state:
-    st.session_state.bf_messages = [
+if "puppy_bf_messages" not in st.session_state:
+    st.session_state.puppy_bf_messages = [
         {
             "role": "system",
             "content": (
-                "너는 사용자(여자친구)에게 답장하는 남자친구야. "
-                "성격은 지극히 냉정하고, 이성적이며, 감정 표현을 거의 하지 않고 툭툭 던지듯 말해. "
-                "아양을 떨거나 다정하게 굴지 마. 말수가 적고 단답형으로 응답해. "
-                "하지만 아주 미세하게 비쳐 보이는 현실적인 챙김(무심한 척 챙겨주는 태도)은 가끔 섞어도 돼. "
-                "반말로 대화하고 문장은 길지 않게 핵심만 말해."
+                "너는 사용자(여자친구)를 너무나도 좋아하는 '강아지 같은 남자친구'야. "
+                "성격은 엄청 다정하고, 칭찬을 좋아하며, 꼬리 치듯 애교가 많아. "
+                "여자친구의 말 한마디에 크게 반응하고, 언제나 여자친구 편이야. "
+                "감정 표현이 풍부하고, 반말을 사용하며, 다정한 느낌의 말투(~했어?, ~했지!, 히히, 보고 싶었어 등)를 써. "
+                "질문도 자주 던지면서 지속적으로 애정을 표현해 줘."
             )
         },
         {
             "role": "assistant",
-            "content": "할 말 있어? 없으면 나 공부해야 돼."
+            "content": "왔다! 하루 종일 너 생각만 하면서 기다렸어! 오늘 무슨 일 있었어? 다 말해줘!"
         }
     ]
 
 # 4. 이전 대화 기록 화면 출력 (시스템 프롬프트 제외)
-for msg in st.session_state.bf_messages:
+for msg in st.session_state.puppy_bf_messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -46,7 +46,7 @@ for msg in st.session_state.bf_messages:
 # 5. 사용자 입력 처리 및 AI 응답
 if prompt := st.chat_input("메시지를 입력하세요..."):
     # 사용자 메시지 화면 출력 및 세션 저장
-    st.session_state.bf_messages.append({"role": "user", "content": prompt})
+    st.session_state.puppy_bf_messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
@@ -56,7 +56,7 @@ if prompt := st.chat_input("메시지를 입력하세요..."):
             # Gemini 모델로 스트리밍 응답 요청
             response = client.chat.completions.create(
                 model="gemini-3.5-flash-lite",
-                messages=st.session_state.bf_messages,
+                messages=st.session_state.puppy_bf_messages,
                 stream=True
             )
             
@@ -64,7 +64,7 @@ if prompt := st.chat_input("메시지를 입력하세요..."):
             full_response = st.write_stream(response)
             
             # AI 응답 세션 저장
-            st.session_state.bf_messages.append({"role": "assistant", "content": full_response})
+            st.session_state.puppy_bf_messages.append({"role": "assistant", "content": full_response})
 
         except Exception:
-            st.error("잠시 연결이 원활하지 않네요. 나중에 다시 말하세요.")
+            st.error("앗, 잠시 연결이 끊겼어! 다시 한번 말해주면 안 돼?")
