@@ -1,49 +1,83 @@
 import streamlit as st
 from openai import OpenAI
 
-# 1. 페이지 기본 설정 및 다크 미스터리 스타일링
+# 1. 페이지 기본 설정 및 다크 테마 커스텀 CSS
 st.set_page_config(
     page_title="🕵️ AI 추리 게임: 저택의 하얀 독약",
     page_icon="🔍",
     layout="wide"
 )
 
-# 고급스러운 추리 소설 느낌의 CSS 스타일
+# 고급스러운 딥 다크 미스터리 스타일링
 st.markdown("""
 <style>
+    /* 전체 배경 및 기본 글자색 설정 */
+    .stApp {
+        background-color: #0E1117;
+        color: #FFFFFF;
+    }
+    
+    /* 메인 타이틀 */
     .main-title {
-        font-size: 2.2rem;
+        font-size: 2.3rem;
         font-weight: 800;
-        color: #E74C3C;
+        color: #FF4B4B;
         text-align: center;
         margin-bottom: 5px;
+        text-shadow: 0px 0px 10px rgba(255, 75, 75, 0.3);
     }
     .sub-title {
         font-size: 1rem;
-        color: #BDC3C7;
+        color: #B0B3B8;
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
+    
+    /* 정보 카드 (피해자 프로필 & 사건 현장 단서) */
     .info-card {
-        background-color: #1E222A;
-        border-left: 5px solid #F1C40F;
-        padding: 18px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #1A1D24 0%, #14171D 100%);
+        border-left: 5px solid #FFD700;
+        border-radius: 10px;
+        padding: 22px;
         margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
+    
+    /* 정보 카드 내부 헤더 */
     .victim-header {
-        color: #F1C40F;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 10px;
+        color: #FFD700;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #2D323E;
+        padding-bottom: 8px;
     }
+    
+    /* 카드 내부 모든 본문 텍스트 - 완전한 하얀색 적용 */
+    .info-card ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .info-card li {
+        color: #FFFFFF !important;
+        font-size: 0.98rem;
+        line-height: 1.7;
+        margin-bottom: 8px;
+    }
+    .info-card li b {
+        color: #FFFFFF !important;
+    }
+    
+    /* 단서 배지 */
     .clue-badge {
-        background-color: #34495E;
-        color: #ECF0F1;
+        background-color: #2D3748;
+        color: #FFD700;
         padding: 3px 8px;
         border-radius: 4px;
         font-size: 0.85rem;
-        margin-right: 5px;
+        font-weight: bold;
+        margin-right: 6px;
+        border: 1px solid #4A5568;
     }
 </style>
 """, unsafe_allow_html=True)
