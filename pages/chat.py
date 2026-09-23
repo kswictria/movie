@@ -1,82 +1,162 @@
 import streamlit as st
 from openai import OpenAI
 
-# 페이지 제목 설정
-st.title("🔍 AI 추리 게임: 저택의 비밀")
-st.caption("저택에서 일어난 의문의 살인사건! 범인을 찾아내세요.")
+# 1. 페이지 기본 설정 및 다크 미스터리 스타일링
+st.set_page_config(
+    page_title="🕵️ AI 추리 게임: 저택의 하얀 독약",
+    page_icon="🔍",
+    layout="wide"
+)
 
-# 1. secrets에서 API 키 불러오기
+# 고급스러운 추리 소설 느낌의 CSS 스타일
+st.markdown("""
+<style>
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #E74C3C;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    .sub-title {
+        font-size: 1rem;
+        color: #BDC3C7;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .info-card {
+        background-color: #1E222A;
+        border-left: 5px solid #F1C40F;
+        padding: 18px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .victim-header {
+        color: #F1C40F;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .clue-badge {
+        background-color: #34495E;
+        color: #ECF0F1;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-right: 5px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">🕵️ CASE #042 : 저택의 하얀 독약</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">용의자들을 심문하고 모순을 찾아 진범을 밝혀내세요.</div>', unsafe_allow_html=True)
+
+# 2. API 키 확인 및 OpenAI 클라이언트 초기화
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except Exception:
     st.error("API 키를 찾을 수 없습니다. .streamlit/secrets.toml 설정을 확인해 주세요.")
     st.stop()
 
-# 2. OpenAI 클라이언트 초기화
 client = OpenAI(
     api_key=api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-# 3. 게임 용어 및 기본 정보 안내
-with st.expander("📌 사건 개요 및 규칙 (클릭하여 열기)", expanded=True):
-    st.write("""
-    **사건:** 지난 밤, 유명한 자산가 한 회장이 자신의 서재에서 독살된 채 발견되었습니다.  
-    **용의자:** 
-    1. **집사 (김철수):** 회장의 가장 가까운 조력자. 은근히 침착하지만 뭔가를 숨기는 듯합니다.
-    2. **가사도우미 (이영희):** 사건 당일 서재 근처를 서성였습니다. 질문을 받으면 불안해합니다.
-    3. **정원사 (박영수):** 최근 회장과 돈 문제로 다투었습니다. 말투가 무뚝뚝합니다.
+# 3. [상단 배치] 피해자(회장) 정보 및 사건 현장 수사 일지
+st.markdown("### 📋 사건 개요 및 피해자 정보")
 
-    * **주의:** 진범은 **'가사도우미(이영희)'**입니다. 하지만 AI는 용의자로서 거짓말과 진실을 섞어 말하며 본인의 알리바이를 주장할 것입니다. 질문을 통해 모순을 찾으세요!
-    """)
+col1, col2 = st.columns([1, 1])
 
-# 4. 용의자 선택
-suspect = st.selectbox(
-    "심문할 용의자를 선택하세요:",
-    ["집사 (김철수)", "가사도우미 (이영희)", "정원사 (박영수)"]
-)
+with col1:
+    st.markdown("""
+    <div class="info-card">
+        <div class="victim-header">👤 피해자 프로필: 한승주 회장 (68세)</div>
+        <ul>
+            <li><b>신분:</b> 글로벌 제약 기업 '한성바이오'의 창업주이자 회장</li>
+            <li><b>성격:</b> 의심이 매우 많고 완벽주의 성향. 최근 누군가 자신을 해치려 한다는 환각 증세를 호소함.</li>
+            <li><b>최근 동향:</b> 사망 당일 밤, 기존 유언장을 전면 수정하여 사회에 환원하겠다고 선언할 예정이었음.</li>
+            <li><b>사망 시각:</b> 어젯밤 22:30 ~ 23:00 사이</li>
+            <li><b>사원 및 사인:</b> 2층 개인 서재에서 독극물(신경독) 중독으로 사망. 마시다 남은 홍차 찻잔에서 독극물 성분 검출.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
-# 용의자별 페르소나 설정
-system_prompts = {
-    "집사 (김철수)": (
-        "너는 살인사건의 용의자인 '집사 김철수'야. "
-        "너는 범인이 아니지만 회장의 비밀 장부를 숨기고 있어서 정직하게 다 말하진 못해. "
-        "정중하고 침착한 어조를 유지해. 회장이 죽기 직전 차를 가져다주었다고 진술해."
-    ),
-    "가사도우미 (이영희)": (
-        "너는 실제 범인인 '가사도우미 이영희'야. 너는 독약을 서재 찻잔에 넣었어. "
-        "절대 자신이 범인임을 직접 인정하지 마. 질문을 받으면 매우 불안해하며, "
-        "사건 시각에 청소를 하고 있었다고 거짓 알리바이를 대지만 유도신문을 당하면 말이 조금씩 꼬여."
-    ),
-    "정원사 (박영수)": (
-        "너는 살인사건의 용의자인 '정원사 박영수'야. "
-        "회장과 돈 문제로 싸운 적이 있어서 억울하게 누명을 쓸까 봐 화가 나 있어. "
-        "무뚝뚝하고 거친 말투를 쓰지만, 사건 시각엔 온실에 있었다는 확실한 증거가 있어."
-    )
+with col2:
+    st.markdown("""
+    <div class="info-card">
+        <div class="victim-header">🔎 사건 현장 발견 단서</div>
+        <ul>
+            <li><span class="clue-badge">단서 1</span> <b>깨진 찻잔:</b> 회장의 책상 위에는 따뜻한 온기가 남은 홍차 잔이 깨져 있었음.</li>
+            <li><span class="clue-badge">단서 2</span> <b>구겨진 수표:</b> 서재 바닥에서 거액의 액수가 적힌 수표 조각이 발견됨.</li>
+            <li><span class="clue-badge">단서 3</span> <b>창틀의 흙자국:</b> 서재 창문 외부 난간에 누군가 밟고 지난 듯한 흙자국이 남아있음.</li>
+            <li><span class="clue-badge">단서 4</span> <b>약통:</b> 수복용 약통이 비어 있었으나, 원래 회장이 먹던 약과는 색깔이 다름.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.divider()
+
+# 4. 용의자 프로필 및 페르소나 설정
+suspect_profiles = {
+    "집사 (김철수, 52세)": {
+        "desc": "20년간 회장을 모신 최측근. 회장의 모든 비밀과 비자금을 알고 있음.",
+        "prompt": (
+            "너는 살인사건 용의자인 '집사 김철수'야. "
+            "회장을 20년간 모셨고 정중하며 침착한 어조를 써. "
+            "너는 회장의 비밀 장부를 숨기고 있어서 약간 머뭇거릴 때가 있어. "
+            "사건 당일 밤 10시쯤 회장에게 홍차를 타줄 것을 가사도우미에게 지시했다고 주장해."
+        )
+    },
+    "가사도우미 (이영희, 41세)": {
+        "desc": "저택의 가사를 담당. 최근 사채 빚으로 심각한 경제적 어려움을 겪고 있음.",
+        "prompt": (
+            "너는 살인사건 용의자인 '가사도우미 이영희'야. "
+            "질문을 받으면 조급하고 불안한 태도를 보여. "
+            "사건 시각에 2층 복도를 청소 중이었다고 주장하지만, 홍차를 서재로 들고 간 인물이야. "
+            "질문이 날카로워지면 말을 얼버무리거나 핑계를 대."
+        )
+    },
+    "정원사 (박영수, 45세)": {
+        "desc": "저택 정원을 관리함. 사건 당일 오후 회장과 돈 문제로 고성을 지르며 다툼.",
+        "prompt": (
+            "너는 살인사건 용의자인 '정원사 박영수'야. "
+            "말투가 거칠고 무뚝뚝하며 억울함에 화가 나 있어. "
+            "회장과 다툰 것은 인정하지만, 사건 시각엔 온실에서 화분을 정리하고 있었다고 주장해."
+        )
+    }
 }
 
-# 5. 용의자별 독립된 세션 상태 초기화
-session_key = f"detective_messages_{suspect}"
+st.markdown("### 🎙️ 용의자 심문실")
+
+selected_suspect = st.selectbox(
+    "심문할 용의자를 선택하세요:",
+    list(suspect_profiles.keys())
+)
+
+# 선택된 용의자 프로필 요약 카드
+st.info(f"📌 **용의자 정보:** {suspect_profiles[selected_suspect]['desc']}")
+
+# 용의자별 대화 세션 관리
+session_key = f"detective_messages_{selected_suspect}"
 if session_key not in st.session_state:
     st.session_state[session_key] = [
-        {"role": "system", "content": system_prompts[suspect]},
-        {"role": "assistant", "content": f"안녕하세요, 탐정님. 저는 {suspect}입니다. 무엇이든 물어보십시오."}
+        {"role": "system", "content": suspect_profiles[selected_suspect]["prompt"]},
+        {"role": "assistant", "content": f"탐정님, 할 말이 있으신가요? 저는 떳떳합니다."}
     ]
 
-# 6. 이전 대화 기록 화면 출력
+# 이전 대화 출력
 for msg in st.session_state[session_key]:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-# 7. 사용자 입력 및 AI 심문 응답
-if prompt := st.chat_input(f"{suspect}에게 질문하기..."):
-    # 사용자 질문 저장 및 출력
+# 질문 입력 및 AI 응답
+if prompt := st.chat_input(f"{selected_suspect.split(' ')[0]}에게 질문하기..."):
     st.session_state[session_key].append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 용의자 응답 생성
     with st.chat_message("assistant"):
         try:
             response = client.chat.completions.create(
@@ -84,21 +164,34 @@ if prompt := st.chat_input(f"{suspect}에게 질문하기..."):
                 messages=st.session_state[session_key],
                 stream=True
             )
-            
             full_response = st.write_stream(response)
             st.session_state[session_key].append({"role": "assistant", "content": full_response})
-
         except Exception:
-            st.error("용의자가 심문에 응하지 않고 있습니다. 잠시 후 다시 질문해 주세요.")
+            st.error("용의자가 심문에 답하지 않고 있습니다. 다시 시도해 주세요.")
 
-# 8. 범인 지목 및 하단 피날레 버튼
+# 5. 최종 범인 지목 섹션
 st.divider()
-st.subheader("⚖️ 범인 지목하기")
-chosen_suspect = st.radio("범인이라고 생각하는 사람을 선택하세요:", ["집사 (김철수)", "가사도우미 (이영희)", "정원사 (박영수)"])
+st.markdown("### ⚖️ 최종 범인 지목")
+st.caption("심문을 통해 얻은 진술의 모순과 현장 단서를 조합하여 범인을 지목하세요.")
 
-if st.button("범인으로 지목하기"):
+chosen_suspect = st.radio(
+    "진범이라고 생각되는 용의자를 선택하세요:",
+    list(suspect_profiles.keys())
+)
+
+if st.button("🚔 체포 영장 집행 (범인 지목)"):
     if "가사도우미" in chosen_suspect:
         st.balloons()
-        st.success("🎉 정답입니다! 가사도우미 이영희가 범인입니다! 그녀의 거짓 알리바이를 간파하셨군요.")
+        st.success("""
+        🎉 **정답입니다! 진범을 체포했습니다!**  
+        
+        **[사건의 전말]**  
+        가사도우미 이영희는 사채 빚을 갚기 위해 회장의 서재에서 거액의 수표를 도둑질하려다 회장에게 들켰습니다. 
+        당황한 그녀는 집사의 지시로 끓여온 홍차에 몰래 신경독을 탔고, 회장이 발작을 일으키며 찻잔을 깨뜨리자 수표 조각만 챙긴 채 서재를 빠져나왔던 것입니다!
+        """)
     else:
-        st.error("❌ 틀렸습니다! 진짜 범인은 유유히 저택을 빠져나갔습니다. 다시 심문해 보세요!")
+        st.error("""
+        ❌ **오판입니다! 해당 용의자는 범인이 아닙니다.**  
+        
+        당신의 잘못된 지목으로 진범이 증거를 인멸하고 저택을 유유히 빠져나갔습니다. 진술을 다시 확인해 보세요!
+        """)
