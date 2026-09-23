@@ -91,8 +91,6 @@ if prompt := st.chat_input(f"{suspect}에게 질문하기..."):
         except Exception:
             st.error("용의자가 심문에 응하지 않고 있습니다. 잠시 후 다시 질문해 주세요.")
 
----
-
 # 8. 범인 지목 및 하단 피날레 버튼
 st.divider()
 st.subheader("⚖️ 범인 지목하기")
