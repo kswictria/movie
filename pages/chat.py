@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 다크 배경 + 입력창/드롭다운 내부 글씨는 검은색으로 고정
+# 다크 배경 + 드롭다운 선택창 및 펼쳐지는 목록 내부 글씨는 완전 검은색 적용
 st.markdown("""
 <style>
     /* 전체 앱 배경 */
@@ -25,10 +25,20 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* 드롭다운(selectbox) 및 입력창 내부 텍스트는 검은색으로 가독성 확보 */
+    /* selectbox 클릭 전 입력 상자 내부 글씨 - 검은색 */
     div[data-baseweb="select"] * {
         color: #000000 !important;
     }
+
+    /* selectbox 클릭 후 아래로 펼쳐지는 드롭다운 팝업 목록 내부 전체 - 검은색 */
+    ul[role="listbox"] * {
+        color: #000000 !important;
+    }
+    div[data-baseweb="popover"] * {
+        color: #000000 !important;
+    }
+
+    /* 채팅 입력창 내부 텍스트 - 검은색 */
     div[data-baseweb="input"] input {
         color: #000000 !important;
     }
@@ -108,7 +118,7 @@ client = OpenAI(
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-# 3. 상단 배치: 피해자 정보 및 사건 현장 단서 (요청하신 설정 적용)
+# 3. 상단 배치: 피해자 정보 및 사건 현장 단서
 st.markdown("### 📋 사건 개요 및 피해자 정보")
 
 col1, col2 = st.columns([1, 1])
@@ -175,7 +185,7 @@ suspect_profiles = {
 
 st.markdown("### 🎙️ 용의자 학생 심문실")
 
-# 드롭다운 - 글씨가 검은색으로 선명하게 보임
+# 드롭다운 - 펼쳐지는 목록의 내부 글씨까지 모두 검은색으로 고정
 selected_suspect = st.selectbox(
     "심문할 용의자 학생을 선택하세요:",
     list(suspect_profiles.keys())
