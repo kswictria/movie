@@ -2,71 +2,69 @@ import streamlit as st
 from openai import OpenAI
 
 # 페이지 제목 설정
-st.title("💬 친절한 정보 선생님 AI")
-st.caption("궁금한 점이 있다면 무엇이든 물어보세요!")
+st.title("❄️ 차가운 남자친구")
+st.caption("필요한 말만 합니다. 잡담은 사절이에요.")
 
-# 1. secrets에서 API 키 가져오기
-# .streamlit/secrets.toml 파일의 GEMINI_API_KEY를 불러옵니다.
+# 1. secrets에서 API 키 불러오기
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except Exception:
-    st.error("API 키를 찾을 수 없습니다. .streamlit/secrets.toml 파일에 GEMINI_API_KEY를 설정해 주세요.")
+    st.error("API 키를 찾을 수 없습니다. .streamlit/secrets.toml 설정을 확인해 주세요.")
     st.stop()
 
-# 2. OpenAI 클라이언트 초기화 (Gemini 엔드포인트 연결)
+# 2. OpenAI 클라이언트 초기화 (Gemini API 연결)
 client = OpenAI(
     api_key=api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-# 3. 세션 상태(Session State)를 활용한 대화 기록 관리
-# 앱이 새로고침되어도 이전 대화 내용이 사라지지 않도록 st.session_state에 저장합니다.
-if "messages" not in st.session_state:
-    # 최초 접속 시 AI의 역할(System Prompt)과 기본 인사말을 설정합니다.
-    st.session_state.messages = [
+# 3. 페르소나(성격) 및 대화 기록 세션 초기화
+if "bf_messages" not in st.session_state:
+    st.session_state.bf_messages = [
         {
             "role": "system",
-            "content": "너는 중고등학생에게 설명하는 친절한 정보 선생님이야. 어려운 말은 쉬운 말로 바꿔 주고, 반드시 순수 한국어로만 답해"
+            "content": (
+                "너는 사용자(여자친구)에게 답장하는 남자친구야. "
+                "성격은 지극히 냉정하고, 이성적이며, 감정 표현을 거의 하지 않고 툭툭 던지듯 말해. "
+                "아양을 떨거나 다정하게 굴지 마. 말수가 적고 단답형으로 응답해. "
+                "하지만 아주 미세하게 비쳐 보이는 현실적인 챙김(무심한 척 챙겨주는 태도)은 가끔 섞어도 돼. "
+                "반말로 대화하고 문장은 길지 않게 핵심만 말해."
+            )
         },
         {
             "role": "assistant",
-            "content": "안녕하세요! 궁금한 점이 있으면 언제든 편하게 물어보세요. 쉬운 말로 친절하게 설명해 드릴게요!"
+            "content": "할 말 있어? 없으면 나 공부해야 돼."
         }
     ]
 
-# 4. 이전 대화 목록을 화면에 말풍선 형태로 표시
-# system 메시지는 화면에 띄우지 않고, user와 assistant 메시지만 표시합니다.
-for msg in st.session_state.messages:
+# 4. 이전 대화 기록 화면 출력 (시스템 프롬프트 제외)
+for msg in st.session_state.bf_messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-# 5. 사용자 입력창 생성 및 처리
-if prompt := st.chat_input("질문을 입력하세요..."):
-    # 사용자가 입력한 메시지를 대화 기록에 추가
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # 사용자가 입력한 메시지를 화면의 채팅 말풍선으로 출력
+# 5. 사용자 입력 처리 및 AI 응답
+if prompt := st.chat_input("메시지를 입력하세요..."):
+    # 사용자 메시지 화면 출력 및 세션 저장
+    st.session_state.bf_messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # AI 응답 생성
+    # AI 응답 출력
     with st.chat_message("assistant"):
         try:
-            # Gemini 모델에 지금까지의 대화 기록 전체를 전달하여 답변 생성 (스트리밍 옵션 포함)
+            # Gemini 모델로 스트리밍 응답 요청
             response = client.chat.completions.create(
                 model="gemini-3.5-flash-lite",
-                messages=st.session_state.messages,
+                messages=st.session_state.bf_messages,
                 stream=True
             )
             
-            # 실시간으로 글자가 흘러나오도록 st.write_stream 활용
+            # 실시간 글자 출력
             full_response = st.write_stream(response)
             
-            # AI 답변을 대화 기록에 추가
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            # AI 응답 세션 저장
+            st.session_state.bf_messages.append({"role": "assistant", "content": full_response})
 
         except Exception:
-            # API 요청 실패 등 에러 발생 시 한국어 안내 문구 표시
-            error_message = "오류가 발생하여 답변을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요."
-            st.error(error_message)
+            st.error("잠시 연결이 원활하지 않네요. 나중에 다시 말하세요.")
